@@ -261,3 +261,7 @@ function gitc {
     } 
     git commit -m $message
 }
+
+function ghrc{gh repo create}
+
+function ghb{gh browse}
