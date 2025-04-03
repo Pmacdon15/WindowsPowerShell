@@ -8,16 +8,6 @@ Set-PSReadLineKeyHandler -Chord 'Ctrl+t' -ScriptBlock {
     [Microsoft.PowerShell.PSConsoleReadLine]::Insert($file)
 }
 
-# Replace ls with eza.exe
-function Get-Func {
-    [Alias('ls')]
-    param (
-        [string]$Path # path for ls
-    )
-    eza.exe --icons=always $Path
-}
-
-
 # use zoxide
 Invoke-Expression (& { (zoxide init powershell | Out-String) })
 
@@ -28,6 +18,50 @@ $env:EDITOR = "code-insiders --wait"
 z Desktop
 
 # Helper functions
+
+function help {
+    Write-Host "---------------------"
+    Write-Host " Available Commands "
+    Write-Host "---------------------"
+
+    Write-Host "### File and Image Commands"
+    Write-Host "---"
+    Write-Host "makeQr: Generate a QR code for a URL."
+    Write-Host "  Usage: makeQr [-data] [-h] [-help]"
+    Write-Host "---------------------"
+    Write-Host "hide: Hide a file in an image."
+    Write-Host "  Usage: hide [-fileHost] [-fileSecret] [-h] [-help]"
+    Write-Host "extract: Extract a file from an image."
+    Write-Host "  Usage: extract [-file] [-h] [-help]"
+    Write-Host "---------------------"
+
+    Write-Host "### System and Productivity Commands"
+    Write-Host "---------------------"
+    Write-Host "speak: Make the computer speak."
+    Write-Host "  Usage: speak [-text] [-h] [-help]"
+    Write-Host "---------------------"
+    Write-Host "ci: Open a repository in VS Code."
+    Write-Host "  Usage: ci [-repo] [-d] [-h] [-help]"
+    Write-Host "---------------------"
+    Write-Host "sudo: Run PowerShell as an administrator."
+    Write-Host "  Usage: sudo [-h] [-help]"
+
+    Write-Host "### Git and Version Control Commands"
+    Write-Host "---------------------"
+    Write-Host "clone: Clone a repository."
+    Write-Host "  Usage: clone [-repo] [-h] [-help]"
+    Write-Host "---------------------"
+    Write-Host "gitc: Commit changes to the repository."
+    Write-Host "  Usage: gitc [-message] [-h] [-help] [-fc]"
+    Write-Host "---------------------"
+    Write-Host "gr: Copy the remote Git repository URL to the clipboard and display."
+    Write-Host "---------------------"
+    Write-Host "ghb: Open the GitHub repository in the browser."
+    Write-Host "---------------------"
+    Write-Host "lg: Open lazygit."
+    Write-Host "---------------------"
+}
+
 function makeQr {
     param(
         [string]$data,
@@ -229,12 +263,11 @@ function sudo {
 
 # Git functions
 function gr {
-    $remoteUrl = git remote -v | Select-String -Pattern "git@github.com" | Select-Object -First 1 | ForEach-Object { ($_ -split '\s+')[1] }
+    $remoteUrl = git remote -v | Select-String -Pattern "git@(github|gitlab).com" | Select-Object -First 1 | ForEach-Object { ($_ -split '\s+')[1] }
     $remoteUrl | clip
     Write-Output $remoteUrl
 }
 
-function ga { git add . }
 function gitc {
     param (
         [string]$message,
@@ -253,15 +286,15 @@ function gitc {
         return
     }
     elseif ($fc) {
-        git commit -m "first commit"
+        git add . ; git commit -m "first commit"
         return
     }    if (-not $message) {
         Write-Host "Error: Commit message is required."
         return
     } 
-    git commit -m $message
+    git add . ; git commit -m $message
 }
 
-function ghrc{gh repo create}
+function ghb { gh browse }
 
-function ghb{gh browse}
+function lg { lazygit }
